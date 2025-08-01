@@ -1,0 +1,40 @@
+﻿@using Datalayer.Entities
+@model Product
+
+<form id="ComplexAttributeValue" class="form-horizontal MainForm" asp-controller="Product" asp-action="AddAttribtuteValue"
+      data-ajax="true" data-ajax-update="#PriceWrapperArea" data-ajax-mode="replace" data-ajax-loading="#LoadingPage">
+    <div class="ComplexAttributeValue" style="margin-top:20px;">
+
+        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+        <p style="text-align:center; margin-bottom:20px;">برای هر ویژگی، مقادیر مورد نظر خود را وارد کنید و با علامت | مقادیر را جدا کنید (مثلا: آبی | قرمز | زرد و ...)</p>
+
+        @foreach (var attrValue in Model.Attributes)
+        {
+            <div class="form-group">
+                <label class="col-lg-3">@attrValue.Name</label>
+                <div class="col-lg-9">
+                    <input class="form-control attributeValueInput" name="attributeValue" value="@string.Join(" | ",attrValue.ProductAttributeValues.Select(x=>x.Value))" />
+                    <input type="hidden" name="AttribueId" value="@attrValue.Id" />
+                </div>
+            </div>
+        }
+
+    </div>
+</form>
+<div class="form-group" style="margin-top:40px;">
+    <div class="row">
+        <div class="col-lg-12">
+            <button class="btn btn-primary" style="width:145px;display: block; float:left" onclick="ComplexAttributeValueSubmit()">ذخیره و مرحله بعد</button>
+            <a class="btn btn-warning" style="width:145px;display: block; float:right"
+                    asp-controller="Product" asp-action="LoadComplexAttributeArea" asp-route-productId="@Model.Id"
+               data-ajax="true" data-ajax-update="#PriceWrapperArea" data-ajax-mode="replace" data-ajax-loading="#LoadingPage">
+                مرحله قبل
+            </a>
+        </div>
+    </div>
+
+</div>
+
+
+

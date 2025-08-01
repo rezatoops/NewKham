@@ -1,0 +1,45 @@
+﻿@using Datalayer.Entities
+@model Product
+
+<form id="ComplexAttributeArea" class="form-horizontal MainForm" asp-controller="Product" asp-action="AddAttribtuteToProduct"
+      data-ajax="true" data-ajax-update="#PriceWrapperArea" data-ajax-mode="replace" data-ajax-loading="#LoadingPage">
+    <div class="ComplexAttributeArea" style="margin-top:20px;">
+
+        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+        <p style="text-align:center; margin-bottom:20px;">عنوان ویژگی مورد نظر خود را وارد کنید و روی علامت + کلیک کنید، بعد از وارد کردن همه ویژگی ها روی مرحله بعد کلیک کنید (مثلا رنگ، مدل، وزن و ...)</p>
+
+        <div class="form-group">
+            <label class="col-lg-3">عنوان ویژگی</label>
+            <div class="col-lg-7">
+                <input class="form-control" id="attributeInput" onkeydown="onEnterPress(event)" />
+            </div>
+            <span class="col-lg-2" onclick="AddAttribute()" style="display:block;cursor:pointer;width:40px; height:35px;background-color:#3ddcf6; border-radius:3px;display: flex;justify-content: center;align-items: center;font-size: 24px;color: white;padding-top: 3px;">+</span>
+        </div>
+
+        <div id="AttributeList" style="margin-top:30px; display:flex;">
+            @{
+                foreach (var attr in Model.Attributes)
+                {
+                    <div class="AttributeItem" style="position:relative;margin: 0px 10px;">
+                        <span style="background-color: #00abff;color: white;padding: 4px 11px;border-radius: 5px;">@attr.Name</span>
+                        <input type="hidden" name="attribute" value="@attr.Name" />
+                        <i class="fa-solid fa-xmark" onClick="removeAtt(this)" style="position:absolute; background:red;color: white;width: 18px;height: 18px;display: flex;justify-content: center;align-items: center;border-radius: 100px;top: -10px;left: -12px;font-size: 10px;padding-top: 1px;cursor: pointer;"></i>
+                    </div>
+                }
+            }
+        </div>
+
+    </div>
+</form>
+<div class="form-group" style="margin-top:40px;">
+    <div class="row">
+        <div class="col-lg-12">
+            <button class="btn btn-primary" style="width:145px;display: block; float:left" onclick="ComplexAttributeAreaSubmit()">ذخیره و مرحله بعد</button>
+        </div>
+    </div>
+    
+</div>
+
+
+

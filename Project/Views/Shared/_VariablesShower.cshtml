@@ -1,0 +1,50 @@
+﻿@using Core.Services.Interfaces
+@using Core.ViewModel
+
+@inject IProductService _productService
+@inject IUserService _userService
+
+@model VariablesShowerViewModel
+
+<div class="Variables" data-selectedvariable="@Model.SelectedVariable.VariableId">
+    @{
+        var filteredVariations = Model.AllVariations;
+       
+
+        foreach (var attr in Model.Product.Attributes)
+        {
+            <div class="Variable">
+                @{
+                    var MainVariationAttributeValue = Model.SelectedVariable.Attributes.FirstOrDefault(a => a.AttributeId == attr.Id);
+                    List<AttributeViewModel> attributeLists = new List<AttributeViewModel>();
+
+                    <p>@attr.Name: </p>
+
+                    foreach (var variation in filteredVariations)
+                    {
+                        attributeLists.Add(variation.Attributes.FirstOrDefault(a => a.AttributeId == attr.Id));
+                    }
+
+                    foreach (var result in attributeLists.DistinctBy(a => a.ValueId))
+                    {
+                        <div class="ProductVariable VariableItemType2 
+                            @((result.ValueId == MainVariationAttributeValue.ValueId)?"active":"")" 
+                            data-attributeId="@result.AttributeId" data-valueId="@result.ValueId" onclick="SelectVariable(this)">
+                            <span>@result.ValueName</span>
+                        </div>
+                    }
+                    var final = new List<VariationViewModel>();
+
+                    foreach (var variation in filteredVariations)
+                    {
+                        if (variation.Attributes.FirstOrDefault(a => a.AttributeId == attr.Id && a.ValueId == MainVariationAttributeValue.ValueId) != null)
+                            final.Add(variation);
+                    }
+
+                    filteredVariations = final;
+                }
+            </div>
+        }
+    }
+
+</div>

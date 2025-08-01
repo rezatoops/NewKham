@@ -1,0 +1,89 @@
+﻿@using Datalayer.Entities
+@using Core.Services.Interfaces
+
+@model Product
+@inject IProductService _productServices
+@inject IToolsService _toolsServices
+
+<a href="~/Product/@Model.Slug">
+    <div class="ProductItem">
+        <div class="productImg" style="background-image: url('/@Model.Photo.Url');"></div>
+        @{
+            if (!string.IsNullOrEmpty(Model.CountSpec))
+            {
+                <div class="CountWeight">
+                    <img src="~/assets/count.png" />
+                    <span>تعداد: @Model.CountSpec</span>
+                    <div class="clear"></div>
+                </div>
+
+            }
+            else if (!string.IsNullOrEmpty(Model.WeightSpec))
+            {
+                <div class="CountWeight">
+                    <img src="~/assets/Weight.png" />
+                    <span>وزن: @Model.WeightSpec</span>
+                    <div class="clear"></div>
+                </div>
+            }
+            else
+            {
+                <div class="CountWeight">
+                </div>
+            }
+        }
+
+        <h2>@Model.Title</h2>
+        @{
+            if (Model.IsSimple)
+            {
+                if (Model.BaseStockNumber > 0)
+                {
+                    <div class="priceSection">
+                        <span class="salePrice">@((Model.BaseSalePrice != null) ? Model.BasePrice.Value.ToString("#,0") + "تومان" : "")</span>
+                        <span class="regularPrice">@((Model.BaseSalePrice != null) ? Model.BaseSalePrice.Value.ToString("#,0") + "تومان" : Model.BasePrice.Value.ToString("#,0") + "تومان")</span>
+                        @{
+                            if (Model.BaseSalePrice != null)
+                            {
+                                <span class="percent">%@_toolsServices.CalculatePercent(Model.BasePrice.Value, Model.BaseSalePrice.Value)</span>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="priceSection">
+                        <span class="salePrice"></span>
+                        <span class="regularPrice" style="color:red; font-size:14px;">ناموجود</span>
+                    </div>
+                }
+            }
+            else
+            {
+                var mainPrice = _productServices.GetMainVariable(Model.Id);
+                if (mainPrice != null)
+                {
+                    <div class="priceSection">
+                        <span class="salePrice">@((mainPrice.SalePrice != null) ? mainPrice.Price.Value.ToString("#,0") + "تومان" : "")</span>
+                        <span class="regularPrice">@((mainPrice.SalePrice != null) ? mainPrice.SalePrice.Value.ToString("#,0") + "تومان" : mainPrice.Price.Value.ToString("#,0") + "تومان")</span>
+                        @{
+                            if (mainPrice.SalePrice != null)
+                            {
+                                <span class="percent">%@_toolsServices.CalculatePercent(mainPrice.Price.Value, mainPrice.SalePrice.Value)</span>
+                            }
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="priceSection">
+                        <span class="salePrice"></span>
+                        <span class="regularPrice" style="color:red; font-size:14px;">ناموجود</span>
+                    </div>
+                }
+            }
+
+        }
+
+    </div>
+</a>

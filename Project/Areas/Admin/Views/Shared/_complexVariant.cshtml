@@ -1,0 +1,53 @@
+﻿@using Core.Services.Interfaces
+@using Core.ViewModel
+@using Datalayer.Entities
+
+@inject IProductService _productService
+
+@model VariationViewModel
+
+<div class="VartiantItem col-lg-12">
+    <div class="form-group col-lg-12" style="text-align: center;">
+        @{
+            int i = 0;
+            foreach (var attr in Model.Product.Attributes)
+            {
+                if (Model.Attributes != null && i < (Model.Attributes.Count()))
+                {
+                    <select asp-for="@Model.Attributes[i].ValueId" name="AttributeValueId">
+                        @{
+                            foreach (var value in attr.ProductAttributeValues)
+                            {
+                                <option id="@value.Id" value="@value.Id">@value.Value</option>
+                            }
+                        }
+                    </select>
+                }
+                else
+                {
+                    <select name="AttributeValueId">
+                        @{
+                            foreach (var value in attr.ProductAttributeValues)
+                            {
+                                <option id="@value.Id" value="@value.Id">@value.Value</option>
+                            }
+                        }
+                    </select>
+                }
+                i++;
+                <input type="hidden" name="AttributeId" value="@attr.Id" />
+            }
+        }
+    </div>
+    <div class="form-group col-lg-12" style="align-items: center;display: flex;">
+        <label class="col-lg-1">قیمت اصلی</label>
+        <input class="form-control text-center col-lg-3 priceInput" min="0" name="Price" type="number" value="@Model.Price" />
+        <label class="col-lg-1">قیمت با تخفیف</label>
+        <input class="form-control text-center col-lg-3" min="0" placeholder="اختیاری" type="number" name="SalePrice" value="@Model.SalePrice" />
+        <label class="col-lg-1">تعداد</label>
+        <input class="form-control text-center col-lg-3" min="0" name="NumberStock" type="number" value="@Model.NumberInStock" />
+    </div>
+    <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+    <input type="hidden" name="VariableId" value="@Model.VariableId" />
+    <div onclick="RemoveVariant(this)" class="closeIcon" style="position:absolute; background:red;color: white;width: 18px;height: 18px;display: flex;justify-content: center;align-items: center;border-radius: 100px;top: 5px;left: 5px;font-size: 10px;padding-top: 1px;cursor: pointer;">x</div>
+</div>

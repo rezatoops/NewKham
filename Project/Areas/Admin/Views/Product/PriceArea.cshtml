@@ -1,0 +1,228 @@
+﻿@using Core.Services.Interfaces
+@using Core.ViewModel
+@using Datalayer.Entities
+
+@inject IProductService _productService
+
+@model Product
+
+@{
+    ViewBag.Title = "قیمت محصول " + Model.Title;
+}
+<div id="LoadingPage">
+    <div class="sk-loading">
+        <div class="sk-spinner sk-spinner-double-bounce">
+            <div class="sk-double-bounce1"></div>
+            <div class="sk-double-bounce2"></div>
+        </div>
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>قیمت گذاری محصول: @Model.Title</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @{
+                        if (ViewBag.errorMessage != null)
+                        {
+                            <div class="col-sm-12 alert alert-danger  text-center">
+                                <span>@ViewBag.errorMessage</span>
+                            </div>
+                        }
+                        if (ViewBag.successMessage != null)
+                        {
+                            <div class="col-sm-12 alert alert-success text-center">
+                                <span>@ViewBag.successMessage</span>
+                            </div>
+                        }
+                    }
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <label>نوع محصول</label>
+                        </div>
+                        <div class="col-lg-9">
+                            <select id="TypeSelect" asp-for="@Model.IsSimple" onchange="GetPriceArea()" class="select2_Type form-control" name="TypeSelected" style="height:50px">
+                                <option value="true">محصول ساده است</option>
+                                <option value="false">محصول متغیر است</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr />
+                    <div id="PriceWrapperArea">
+                        @{
+                            if (Model.IsSimple)
+                            {
+                                <partial name="_simplePriceArea" model="@Model" />
+                            }
+                            else
+                            {
+                                if (Model.Variables.Count > 0)
+                                {
+                                    <partial name="_complexVariants" model="@Model" />
+                                }
+                                else
+                                {
+                                    <partial name="_complexAttributeArea" model="@Model" />
+                                }
+                            }
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <link href="~/plugin/select2/select2.min.css" rel="stylesheet" />
+}
+@section scripts {
+    <script src="~/plugin/select2/select2.full.min.js"></script>
+    <script src="~/admin/plugin/sweetalert/sweetalert2.all.min.js"></script>
+
+
+    <script>
+        $(".select2_Type").select2({
+            dir: "rtl",
+            minimumResultsForSearch: -1,
+        });
+
+    </script>
+
+    <script>
+
+        function SimplePriceAreaSubmit(e) {
+            if (!$("#BasePrice").val()) {
+                e.preventDefault();
+                Swal.fire({ title: "خطا", text: "برای محصول باید یک قیمت وارد کنید", icon: "error" });
+            }
+        }
+    </script>
+
+    <script>
+        function AddAttribute() {
+            var attribute = $("#attributeInput").val().trim();
+            if (attribute) {
+                $("#AttributeList").append(`
+                            <div class="AttributeItem" style="position:relative;margin: 0px 10px;">
+                                <span style="background-color: #00abff;color: white;padding: 4px 11px;border-radius: 5px;">${attribute}</span>
+                                <input type="hidden" name="attribute" value="${attribute}" />
+                                <i class="fa-solid fa-xmark" onClick="removeAtt(this)" style="position:absolute; background:red;color: white;width: 18px;height: 18px;display: flex;justify-content: center;align-items: center;border-radius: 100px;top: -10px;left: -12px;font-size: 10px;padding-top: 1px;cursor: pointer;"></i>
+                            </div>
+                        `);
+                $("#attributeInput").val('');
+            }
+        }
+
+        function removeAtt(element) {
+            $(element).parent().remove();
+        }
+
+        function onEnterPress(e) {
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                AddAttribute();
+            }
+        }
+
+        function ComplexAttributeAreaSubmit() {
+            if ($(".AttributeItem").length == 0) {
+                Swal.fire({ title: "خطا", text: "حداقل یک ویژگی باید تعریف کنید", icon: "error" });
+            }
+            else {
+                $("#ComplexAttributeArea").submit();
+            }
+        }
+    </script>
+
+    <script>
+        function ComplexAttributeValueSubmit() {
+            let isAnyEmpty = false;
+            $(".attributeValueInput").each(function () {
+                if ($.trim($(this).val()) === '') {
+                    isAnyEmpty = true;
+                    return false;
+                }
+            });
+
+            if (isAnyEmpty) {
+                Swal.fire({ title: "خطا", text: "باید برای تمام ویژگی ها مقدار وارد کنید", icon: "error" });
+            }
+            else {
+                $("#ComplexAttributeValue").submit();
+            }
+        }
+    </script>
+
+    <script>
+        function AddVariant() {
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/Product/LoadEmptyVariant",
+                    data: { 'productId': @Model.Id },
+                    success:
+
+                        function (result) {
+                            $("#Variants").append(result);
+                        },
+                    error: function (req, status, error) {
+                        window.alert("Error!");
+                    }
+                });
+        }
+        function RemoveVariant(element) {
+            $(element).parent().remove();
+        }
+
+        function ComplexVariantSubmit() {
+            let isAnyEmpty = false;
+            $(".priceInput").each(function () {
+                if ($.trim($(this).val()) === '' || $.trim($(this).val()) === '0') {
+                    isAnyEmpty = true;
+                    return false;
+                }
+            });
+
+            if (isAnyEmpty) {
+                Swal.fire({ title: "خطا", text: "تمامی متغیرها باید مقدار قیمت اصلی داشته باشند", icon: "error" });
+            }
+            else {
+                $("#ComplexVariants").submit();
+            }
+        }
+    </script>
+
+    <script>
+        function GetPriceArea() {
+            var isSimple = $('#TypeSelect :selected').val();
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/Product/GetPriceArea",
+                    data: { 'isSimple': isSimple, 'productId': @Model.Id },
+                    success:
+                        function (result) {
+                            $("#PriceWrapperArea").html(result);
+                        },
+                    error: function (req, status, error) {
+                        window.alert("Error!");
+                    }
+                });
+        }
+    </script>
+}
+

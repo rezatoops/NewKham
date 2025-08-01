@@ -1,0 +1,102 @@
+﻿@using Core.Enums
+@using Core.Services.Interfaces
+@using Core.ViewModel;
+@using Datalayer.Entities
+
+@inject IUserService _userService
+@inject IProductService _productService
+
+@model CartViewModel
+
+@{
+    ViewData["Title"] = "سبد خرید";
+}
+
+<div id="loadingCircleShop" class="loadingio-spinner-ball-rd8liqklqbg">
+    <div class="ldio-c3e11cu2eq9">
+        <div></div>
+    </div>
+</div>
+<div class="shop_cart section">
+    <div class="cartTitle">
+        <i class="fal fa-shopping-basket"></i>
+        <span>سبد خرید</span>
+    </div>
+    @{
+        if (ViewBag.NOK != null)
+        {
+            <div class="errorMsg">
+                <ul>
+                    @ViewBag.NOK
+                </ul>
+            </div>
+        }
+    }
+    @{
+
+        foreach (var error in Model.ErrorMessages)
+        {
+            <div class="notifyMsg">
+                @error
+            </div>
+        }
+
+        if (Model.CartStatus == CartStatus.NotLoggedIn)
+        {
+            <p class="massage errorMSG">برای دیدن سبد خرید باید ابتدا در سایت وارد شوید </p>
+            <a onclick="OpenLoginModal()" style="margin:0px auto;" class="ActionButton">ورود به سایت</a>
+        }
+        else if (Model.CartStatus == CartStatus.NotOpenOrder)
+        {
+            <p class="massage errorMSG">سبد خرید شما خالی است</p>
+            <a href="/" class="ActionButton" style="margin:0px auto;">برگشت به فروشگاه</a>
+        }
+        else
+        {
+            <div class="shopCartTable">
+
+                @{
+                    foreach (var item in Model.Order.OrderProducts)
+                    {
+                        <div class="cartRow" id="cart_@item.Id">
+                            <partial name="_CartItem" model="item" />
+                        </div>
+                    }
+                }
+
+            </div>
+
+            <div class="shopCartDetails">
+                <div id="shopCartDetails">
+                    <partial name="_ShopCartDetails" model="@Model.Order" />
+                </div>
+                <a href="~/Checkout" class="btn ProgressCartBtn">ادامه فرایند خرید</a>
+            </div>
+        }
+
+    }
+
+
+    <div class="clear"></div>
+</div>
+
+@section scripts {
+    <script>
+        function UpdateCheckoutWidget(orderId) {
+            $.ajax({
+                type: "POST",
+                url: "/Shop/RefreshShopCartWidget",
+                data: { OrderId: orderId },
+                success:
+                    function (result) {
+                        $("#shopCartDetails").html(result);
+                        UpdateNumberOrderCard();
+                    },
+                error: function (req, status, error) {
+                    window.alert("Error!");
+                }
+            });
+        }
+    </script>
+}
+

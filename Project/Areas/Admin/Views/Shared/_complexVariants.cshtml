@@ -1,0 +1,58 @@
+﻿@using Core.Services.Interfaces
+@using Datalayer.Entities
+
+@inject IProductService _productService
+
+@model Product
+@{
+    if (ViewBag.errorMessage != null)
+    {
+        <div class="col-sm-12 alert alert-danger  text-center">
+            <span>@ViewBag.errorMessage</span>
+        </div>
+    }
+    if (ViewBag.successMessage != null)
+    {
+        <div class="col-sm-12 alert alert-success text-center">
+            <span>@ViewBag.successMessage</span>
+        </div>
+    }
+}
+<form id="ComplexVariants" class="form-horizontal MainForm" asp-controller="Product" asp-action="AddVariants"
+      data-ajax="true" data-ajax-update="#PriceWrapperArea" data-ajax-mode="replace" data-ajax-loading="#LoadingPage">
+    <div class="ComplexVariants" style="margin-top:20px;">
+
+        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+        <p style="text-align:center; margin-bottom:20px;">بر اساس ویژگی های انتخابی میتوانید متغیر های محصول خود را تعریف کنید</p>
+        <div id="Variants">
+            @foreach (var variant in _productService.GetAllProductVariations(Model.Id))
+            {
+                <partial name="_complexVariant" model="variant" />
+            }
+        </div>
+
+    </div>
+</form>
+<div class="form-group" style="margin-top:40px;">
+    <div class="row">
+        <div class="col-lg-12">
+            <button class="btn btn-info" style="width:145px;display: block; margin:0px auto;" onclick="AddVariant()">متغیر جدید</button>
+        </div>
+    </div>
+</div>
+<div class="form-group" style="margin-top:40px;">
+    <div class="row">
+        <div class="col-lg-12">
+            <button class="btn btn-primary" style="width:145px;display: block; float:left" onclick="ComplexVariantSubmit()">ثبت نهایی</button>
+            <a class="btn btn-warning" style="width:145px;display: block; float:right"
+               asp-controller="Product" asp-action="LoadComplexAttributeValue" asp-route-productId="@Model.Id"
+               data-ajax="true" data-ajax-update="#PriceWrapperArea" data-ajax-mode="replace" data-ajax-loading="#LoadingPage">
+                مرحله قبل
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
